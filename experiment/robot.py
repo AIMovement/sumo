@@ -7,11 +7,13 @@ import resources
 class Robot(pyglet.sprite.Sprite):
     """Physical object that responds to user input"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, controllable, *args, **kwargs):
         super(Robot, self).__init__(img=resources.sumo_image, *args, **kwargs)
 
-        self.velocity_x, self.velocity_y = 0.0, 0.0
-        self.beta = 0.0
+        self.controllable = controllable
+
+        self.robot_width = 0.10
+        self.robot_height = 0.10
 
         self.keys = dict(left=False, right=False)
 
@@ -45,27 +47,27 @@ class Robot(pyglet.sprite.Sprite):
         # Model inspiration from
         # http://kdm.p.lodz.pl/articles/2011/15_4_5.pdf
 
-        ROBOT_WIDTH = 0.10
+        if not self.controllable:
+            return
+
         WHEEL_RADIUS = 0.015
         M_TO_MM = 1000.0
 
         vr = 2.0*math.pi*WHEEL_RADIUS if self.keys['right'] else 0.0
         vl = 2.0*math.pi*WHEEL_RADIUS if self.keys['left'] else 0.0
 
-        beta_dot = (vr - vl)/ROBOT_WIDTH
+        beta_dot = (vl - vr)/self.robot_width
 
-        self.beta = self.beta + beta_dot * dt
+        self.rotation = self.rotation + math.degrees(beta_dot * dt)
 
         avg_vel = (vl + vr)/2.0
 
-        x_dot = avg_vel * math.cos(self.beta)
-        y_dot = avg_vel * math.sin(self.beta)
+        x_dot = avg_vel * math.cos(math.radians(self.rotation))
+        y_dot = avg_vel * math.sin(math.radians(self.rotation))
 
         y_dot = -1.0 * y_dot    # y-axis in image is down => invert
 
         self.x = self.x + M_TO_MM * x_dot * dt
         self.y = self.y + M_TO_MM * y_dot * dt
-
-        self.rotation = math.degrees(self.beta)
 
         self.check_bounds()
