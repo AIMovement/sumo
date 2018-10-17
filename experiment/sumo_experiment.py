@@ -92,6 +92,6 @@ if __name__ == "__main__":
     r_fixed.rotation = 30
 
     vis.add_robot(r_fixed)
-    vis.add_robot(robot.Robot(controllable=True, x=400, y=300, batch=vis.batch))
+    vis.add_robot(robot.Robot(controllable=True, batch=vis.batch))
 
     pyglet.app.run()
