@@ -33,8 +33,6 @@ class Robot(pyglet.sprite.Sprite):
     def update(self):
         state = self.bot.state()
 
-        print(state)
-
         M_TO_MM = 1000.0
         self.x = M_TO_MM * state[0]
         self.y = M_TO_MM * state[1]

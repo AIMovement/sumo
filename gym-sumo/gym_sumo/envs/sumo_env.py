@@ -105,7 +105,7 @@ class SumoEnv(gym.Env):
         return self.robot.sensor_values()
 
     def render(self, mode='human'):
-        f self.vis is None:
+        if self.vis is None:
             self.vis = Visualizer(self.arena, width=800, height=800)
 
         #pyglet.app.run()
