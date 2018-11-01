@@ -16,7 +16,7 @@ if __name__ == "__main__":
     r = 0.0
     is_done = False
 
-    for _ in np.arange(0.0, 10.0, env.time_step):
+    for _ in np.arange(0.0, 5.0, env.time_step):
         env.render()
         time.sleep(env.time_step)
         action = env.action_space.sample()

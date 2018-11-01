@@ -5,6 +5,7 @@ class Arena(object):
     def __init__(self):
         self.bots = list()
         self.radius = 0.77 / 2.0
+        self.edge_width = 0.025
 
     def add_robot(self, robot):
         self.bots.append(robot)
