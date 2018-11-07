@@ -20,7 +20,8 @@ if __name__ == "__main__":
         env.render()
         time.sleep(env.time_step)
         action = env.action_space.sample()
-        obs, reward, is_done, _ = env.step(action)
+        obs, reward, is_done, _ = env.step((15,5))
+        #print(obs)
         r += reward
         if is_done:
             break

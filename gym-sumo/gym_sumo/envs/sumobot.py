@@ -1,29 +1,80 @@
 import numpy as np
+from numpy.linalg import norm
 import math
-
-class DistanceSensor(object):
-    def __init__(self, robot, pos, angle):
-        self.robot = robot
-
-    def value(self):
-        return 10.0
-
-class DigitalSensor(object):
-    def __init__(self, robot, pos):
-        self.robot = robot
-
-    def value(self):
-        return False
 
 def rotate(vec, angle):
     c, s = np.cos(angle), np.sin(angle)
-    return np.matrix([[c,-s], [s, c]]) * vec
+    return np.dot(np.array([[c,-s], [s, c]]), vec)
+
+class DistanceSensor(object):
+    def __init__(self, robot, arena, x0, y0, angle):
+        self.robot = robot
+        self.arena = arena
+        self.offset = np.array([[x0], [y0]])
+        self.angle = angle
+
+        self.alfa = math.radians(9.8)
+        self.beta = math.radians(1.6)
+
+        self.raw_per_dist = (500.0-200.0)/(0.15-0.45)
+
+    def normal(self):
+        return rotate(self.offset, self.robot.get_angle())
+
+    def position(self):
+        return self.robot.position() + self.normal()
+
+    def get_angle(self):
+        return self.robot.get_angle() + self.angle
+
+    def is_observable(self, pos):
+        p = np.append(pos, 0.0)
+        a = np.append(rotate(self.normal(), self.alfa), 0.0)
+        b = np.append(rotate(self.normal(), -self.beta), 0.0)
+        p_ccw_of_b = np.cross(b,p)[2] > 0
+        a_ccw_of_p = np.cross(p,a)[2] > 0
+        return a_ccw_of_p and p_ccw_of_b
+
+    def distance_to_raw_value(self, dist):
+        # Might need to improve this, see notebook...
+        return min(max(500.0 + self.raw_per_dist * (dist-0.15), 0.0), 550)
+
+    def value(self):
+        closest = np.finfo(np.float32).max
+        for enemy in self.arena.get_enemies(of_robot=self.robot):
+            corners = enemy.corners()
+            for i, _ in enumerate(corners):
+                c0, c1 = corners[i], corners[(i+1) % len(corners)]
+                for a in np.arange(0.0, 1.0, 0.2):
+                    c_test = a * c0 + (1.0-a) * c1
+                    p = c_test - self.position()
+                    if self.is_observable(p):
+                        closest = min(closest, norm(p))
+
+        return self.distance_to_raw_value(closest)
+
+class DigitalSensor(object):
+    def __init__(self, robot, arena, x0, y0):
+        self.robot = robot
+        self.arena = arena
+        self.offset = np.array([[x0], [y0]])
+
+    def normal(self):
+        return rotate(self.offset, self.robot.get_angle())
+
+    def position(self):
+        return self.robot.position() + self.normal()
+
+    def value(self):
+        r_outer = self.arena.radius
+        r_inner = r_outer-self.arena.edge_width
+        return r_inner <= norm(self.position()) <= r_outer
 
 class Sumobot(object):
 
     def __init__(self, arena, x0, y0, angle0=0.0):
         self.arena = arena
-        self.pos = np.matrix([[x0], [y0]])
+        self.pos = np.array([[x0], [y0]])
         self.angle = angle0
 
         self.rot_vel_wheel_right = 0.0
@@ -33,17 +84,17 @@ class Sumobot(object):
         self.wheel_radius = 0.015
 
         self.distance_sensors = [
-            DistanceSensor(self, pos=(0.0, 0.0), angle=0.0), # front-front
-            DistanceSensor(self, pos=(0.0, 0.0), angle=0.0), # front-left
-            DistanceSensor(self, pos=(0.0, 0.0), angle=0.0), # front-right
-            DistanceSensor(self, pos=(0.0, 0.0), angle=0.0), # left
-            DistanceSensor(self, pos=(0.0, 0.0), angle=0.0)  # right
+            DistanceSensor(self, arena, x0=0.04,  y0=0.0,   angle=0.0),          # front-front
+            DistanceSensor(self, arena, x0=0.035, y0=0.02,  angle=math.pi/2/4),  # front-left
+            DistanceSensor(self, arena, x0=0.035, y0=-0.02, angle=-math.pi/2/4), # front-right
+            DistanceSensor(self, arena, x0=0.0,   y0=0.03,  angle=math.pi/2),    # left
+            DistanceSensor(self, arena, x0=0.0,   y0=-0.03, angle=-math.pi/2)    # right
         ]
 
         self.digital_sensors = [
-            DigitalSensor(self, pos=(0.0, 0.0)), # front-left
-            DigitalSensor(self, pos=(0.0, 0.0)), # front-right
-            DigitalSensor(self, pos=(0.0, 0.0))  # back
+            DigitalSensor(self, arena, x0=0.03, y0=0.04),  # front-left
+            DigitalSensor(self, arena, x0=0.03, y0=-0.04), # front-right
+            DigitalSensor(self, arena, x0=-0.045, y0=0.0)  # back
         ]
 
         self.arena.add_robot(self)
@@ -68,7 +119,7 @@ class Sumobot(object):
         x_dot = avg_vel * math.cos(self.angle)
         y_dot = avg_vel * math.sin(self.angle)
 
-        self.pos += np.matrix([[x_dot], [y_dot]]) * dt
+        self.pos += np.array([[x_dot], [y_dot]]) * dt
 
     def sensor_values(self):
         vals = [sensor.value() for sensor in self.distance_sensors] + \
@@ -76,7 +127,7 @@ class Sumobot(object):
         return np.array(vals)
 
     def corners(self):
-        p0 = np.matrix([[self.size], [self.size]]) / 2.0
+        p0 = np.array([[self.size], [self.size]]) / 2.0
         angles = [self.angle + n*math.pi/2.0 for n in range(4)]
         return [self.pos + rotate(p0, angle) for angle in angles]
 
@@ -100,7 +151,13 @@ class Sumobot(object):
         return False
 
     def is_outside(self):
-        return np.linalg.norm(self.pos) > self.arena.radius
+        return norm(self.pos) > self.arena.radius
+
+    def position(self):
+        return self.pos
+
+    def get_angle(self):
+        return self.angle
 
     def state(self):
-        return np.array([self.pos.item(0), self.pos.item(1), self.angle])
+        return np.array([self.pos[0], self.pos[1], self.angle])

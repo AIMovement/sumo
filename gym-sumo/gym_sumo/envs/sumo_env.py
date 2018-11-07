@@ -105,6 +105,7 @@ class SumoEnv(gym.Env):
         M_TO_PIXEL = 1000.0
         screen_width = 800
         screen_height = 800
+        show_sensor_pos = False
 
         if self.viewer is None:
             from gym.envs.classic_control import rendering
@@ -148,6 +149,16 @@ class SumoEnv(gym.Env):
             self.viewer.add_geom(bot)
             self.viewer.add_geom(arrow)
 
+            if show_sensor_pos:
+                self.senstran = list()
+                for i, _ in enumerate(self.robot.distance_sensors):
+                    sensor = rendering.FilledPolygon([(5,-12), (5,12), (-3,0)])
+                    sensor.set_color(1,1,1)
+                    t = rendering.Transform()
+                    self.senstran.append(t)
+                    sensor.add_attr(t)
+                    self.viewer.add_geom(sensor)
+
             enmy = rendering.FilledPolygon([(-W,-W), (W,-W), (W,W), (-W,W)])
             enmy.set_color(0.6,0.6,0.6)
             arrow = rendering.FilledPolygon([(0,-W), (0,W), (W,0)])
@@ -158,14 +169,19 @@ class SumoEnv(gym.Env):
             self.viewer.add_geom(enmy)
             self.viewer.add_geom(arrow)
 
+        if show_sensor_pos:
+            for i, s in enumerate(self.robot.distance_sensors):
+                p = s.position()
+                self.senstran[i].set_translation(screen_width/2+M_TO_PIXEL*p[0], screen_height/2+M_TO_PIXEL*p[1])
+                self.senstran[i].set_rotation(s.get_angle())
 
-        bot_state = self.robot.state()
-        self.bottrans.set_translation(screen_width/2+M_TO_PIXEL*bot_state[0], screen_height/2+M_TO_PIXEL*bot_state[1])
-        self.bottrans.set_rotation(bot_state[2])
+        p = self.robot.position()
+        self.bottrans.set_translation(screen_width/2+M_TO_PIXEL*p[0], screen_height/2+M_TO_PIXEL*p[1])
+        self.bottrans.set_rotation(self.robot.get_angle())
 
-        enmy_state = self.enemy.state()
-        self.enmytrans.set_translation(screen_width/2+M_TO_PIXEL*enmy_state[0], screen_height/2+M_TO_PIXEL*enmy_state[1])
-        self.enmytrans.set_rotation(enmy_state[2])
+        p = self.enemy.position()
+        self.enmytrans.set_translation(screen_width/2+M_TO_PIXEL*p[0], screen_height/2+M_TO_PIXEL*p[1])
+        self.enmytrans.set_rotation(self.enemy.get_angle())
 
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
