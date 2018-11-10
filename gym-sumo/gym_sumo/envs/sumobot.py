@@ -1,10 +1,11 @@
 import numpy as np
+from numpy import dot
 from numpy.linalg import norm
 import math
 
 def rotate(vec, angle):
-    c, s = np.cos(angle), np.sin(angle)
-    return np.dot(np.array([[c,-s], [s, c]]), vec)
+    c, s = math.cos(angle), math.sin(angle)
+    return dot(np.array([[c,-s], [s, c]]), vec)
 
 class DistanceSensor(object):
     def __init__(self, robot, arena, x0, y0, angle):
@@ -27,12 +28,10 @@ class DistanceSensor(object):
     def get_angle(self):
         return self.robot.get_angle() + self.angle
 
-    def is_observable(self, pos):
-        p = np.append(pos, 0.0)
-        a = np.append(rotate(self.normal(), self.alfa), 0.0)
-        b = np.append(rotate(self.normal(), -self.beta), 0.0)
-        p_ccw_of_b = np.cross(b,p)[2] > 0
-        a_ccw_of_p = np.cross(p,a)[2] > 0
+    def is_observable(self, pos, v):
+        v_a, v_b = v
+        p_ccw_of_b = (v_b[0]*pos[1] - v_b[1]*pos[0]) > 0 # cross_z
+        a_ccw_of_p = (pos[0]*v_a[1] - pos[1]*v_a[0]) > 0 # cross_z
         return a_ccw_of_p and p_ccw_of_b
 
     def distance_to_raw_value(self, dist):
@@ -40,6 +39,9 @@ class DistanceSensor(object):
         return min(max(500.0 + self.raw_per_dist * (dist-0.15), 0.0), 550)
 
     def value(self):
+        pos = self.position()
+        n = self.normal()
+        v = (rotate(n, self.alfa), rotate(n, -self.beta))
         closest = np.finfo(np.float32).max
         for enemy in self.arena.get_enemies(of_robot=self.robot):
             corners = enemy.corners()
@@ -47,8 +49,8 @@ class DistanceSensor(object):
                 c0, c1 = corners[i], corners[(i+1) % len(corners)]
                 for a in np.arange(0.0, 1.0, 0.2):
                     c_test = a * c0 + (1.0-a) * c1
-                    p = c_test - self.position()
-                    if self.is_observable(p):
+                    p = c_test - pos
+                    if self.is_observable(p, v):
                         closest = min(closest, norm(p))
 
         return self.distance_to_raw_value(closest)
