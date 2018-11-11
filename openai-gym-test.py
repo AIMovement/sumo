@@ -1,26 +1,26 @@
-# Install sumo-gym before running:
-# > cd gym-sumo && pip install -e .
+#!/usr/bin/env python3
+
+'''
+    Install sumo-gym before running:
+    > cd gym-sumo && pip install -e .
+'''
 
 import gym
 import gym_sumo
 
 import numpy as np
 
-import time
-
-if __name__ == "__main__":
-    env = gym.make("sumo-v0")
+def main(env):
 
     env.reset()
 
     r = 0.0
     is_done = False
 
-    for _ in np.arange(0.0, 5.0, env.time_step):
+    for _ in np.arange(0.0, 5.0, 0.02):
         env.render()
-        time.sleep(env.time_step)
-        action = env.action_space.sample()
-        obs, reward, is_done, _ = env.step((15,5))
+        action = (15,5) # env.action_space.sample()
+        obs, reward, is_done, _ = env.step(action)
         #print(obs)
         r += reward
         if is_done:
@@ -29,3 +29,10 @@ if __name__ == "__main__":
     env.close()
 
     print("Total reward {0}".format(r))
+
+if __name__ == "__main__":
+    env = gym.make("sumo-v0")
+
+    #import cProfile
+    #cProfile.run('main(env)', sort=1)
+    main(env)

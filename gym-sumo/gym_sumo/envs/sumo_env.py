@@ -36,6 +36,8 @@ class SumoEnv(gym.Env):
         'video.frames_per_second' : 50
     }
 
+    TIME_STEP = 0.02
+
     def __init__(self):
         # Two control signals: left and right motor command, each within -1 to 1
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
@@ -52,8 +54,6 @@ class SumoEnv(gym.Env):
             1.0])
 
         self.observation_space = spaces.Box(low, high, dtype=np.float32)
-
-        self.time_step = 0.02
 
         self.viewer = None
 
@@ -72,22 +72,20 @@ class SumoEnv(gym.Env):
             rot_vel_wheel_left=enemy_action[0], \
             rot_vel_wheel_right=enemy_action[1])
 
-        self.arena.update(self.time_step)
+        self.arena.update(self.TIME_STEP)
 
         is_done = self.robot.has_collided() or self.robot.is_outside()
 
-        # For now, just reward finding and running into enemy
-        if self.robot.is_outside():
-            reward = -1.0
-        elif self.enemy.is_outside():
-            reward = 2.0
-        elif self.robot.has_collided():
-            reward = 1.0
-        else:
-            reward = 0.0
-        # we should also reward moving and finding enemy (low sensor values?)
-
         obs = self.robot.sensor_values()
+
+        if self.robot.is_outside():
+            reward = -1000.0
+        elif self.enemy.is_outside():
+            reward = 10.0
+        elif self.robot.has_collided():
+            reward = 10.0**6
+        else:
+            reward = max(obs[:5]) * (1.0/550.0)
 
         return obs, reward, is_done, {}
 
