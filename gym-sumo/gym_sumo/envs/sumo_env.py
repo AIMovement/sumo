@@ -3,6 +3,7 @@ from gym_sumo.envs.sumobot import Sumobot
 from gym.envs.classic_control import rendering
 
 import numpy as np
+from numpy.linalg import norm
 import math
 
 import pyglet
@@ -62,7 +63,7 @@ class SumoEnv(gym.Env):
     def step(self, action):
         self.nof_steps += 1
 
-        enemy_action = self.action_space.sample()
+        enemy_action = (0,0) #self.action_space.sample()
 
         self.robot.set_motor_commands( \
             rot_vel_wheel_left=action[0], \
@@ -74,26 +75,48 @@ class SumoEnv(gym.Env):
 
         self.arena.update(self.TIME_STEP)
 
-        is_done = self.robot.has_collided() or self.robot.is_outside()
+
+        is_outside = self.robot.is_outside()
+        has_collided = self.robot.has_collided()
 
         obs = self.robot.sensor_values()
 
-        if self.robot.is_outside():
-            reward = -1000.0
-        elif self.enemy.is_outside():
-            reward = 10.0
-        elif self.robot.has_collided():
-            reward = 10.0**6
+        if is_outside:
+            reward = -10000.0
+        #elif self.enemy.is_outside():
+        #    reward = 10.0
+        elif has_collided:
+            reward = 10000.0
         else:
-            reward = max(obs[:5]) * (1.0/550.0)
+            reward = 2.0*self.arena.radius - norm(self.robot.position()-self.enemy.position()) - self.nof_steps
 
-        return obs, reward, is_done, {}
+        return obs, reward, is_outside or has_collided, {}
 
     def reset(self):
         self.arena = Arena()
         # Should place enemy (but not own robot?) at random within quadrant?
-        self.robot = Sumobot(arena=self.arena, x0=  0.15, y0=  0.15, angle0=0.0)
-        self.enemy = Sumobot(arena=self.arena, x0= -0.15, y0= -0.15, angle0=math.pi)
+
+        while True:
+            p = np.random.uniform([0.0, 0.0, 0.0], [0.8, 1.0, 1.0], 3)
+            r, th, a0 = self.arena.radius*p[0], 2.0*math.pi*p[1], 2.0*math.pi*p[2]
+            self.robot = Sumobot(arena=self.arena, x0=r*math.cos(th), y0=r*math.sin(th), angle0=a0)
+            self.arena.add_robot(self.robot)
+            if not self.robot.is_outside():
+                break
+            self.arena.remove_robot(self.robot)
+
+        while True:
+            p = np.random.uniform([0.0, 0.0, 0.0], [0.8, 1.0, 1.0], 3)
+            r, th, a0 = self.arena.radius*p[0], 2.0*math.pi*p[1], 2.0*math.pi*p[2]
+            self.enemy = Sumobot(arena=self.arena, x0=r*math.cos(th), y0=r*math.sin(th), angle0=a0)
+            self.arena.add_robot(self.enemy)
+            dist = norm(self.robot.position()-self.enemy.position())
+            if not self.enemy.is_outside() and not self.enemy.has_collided() and dist > 0.2:
+                break
+            self.arena.remove_robot(self.enemy)
+
+        #self.robot = Sumobot(arena=self.arena, x0=  0.15, y0=  0.15, angle0=0.0)
+        #self.enemy = Sumobot(arena=self.arena, x0= -0.15, y0= -0.15, angle0=math.pi)
 
         self.nof_steps = 0
 

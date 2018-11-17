@@ -99,8 +99,6 @@ class Sumobot(object):
             DigitalSensor(self, arena, x0=-0.045, y0=0.0)  # back
         ]
 
-        self.arena.add_robot(self)
-
     def set_motor_commands(self, rot_vel_wheel_left, rot_vel_wheel_right):
         self.rot_vel_wheel_left = rot_vel_wheel_left
         self.rot_vel_wheel_right = rot_vel_wheel_right

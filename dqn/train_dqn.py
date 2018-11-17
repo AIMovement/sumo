@@ -19,10 +19,10 @@ ENV_NAME = "sumo-v0"
 MEAN_REWARD_BOUND = 1.5*10**6 #19.5
 
 GAMMA = 0.99
-BATCH_SIZE = 32
+BATCH_SIZE = 128
 REPLAY_SIZE = 10000
 LEARNING_RATE = 1e-4
-SYNC_TARGET_FRAMES = 1000
+SYNC_TARGET_FRAMES = 10000
 REPLAY_START_SIZE = 10000
 
 EPSILON_DECAY_LAST_FRAME = 10*10**6
@@ -122,12 +122,14 @@ if __name__ == "__main__":
     optimizer = optim.Adam(net.parameters(), lr=LEARNING_RATE)
     total_rewards = []
     frame_idx = 0
+    steps = 0
     ts_frame = 0
     ts = time.time()
     best_mean_reward = None
 
     while True:
         frame_idx += 1
+        steps += 1
         epsilon = max(EPSILON_FINAL, EPSILON_START - frame_idx / EPSILON_DECAY_LAST_FRAME)
 
         reward = agent.play_step(net, epsilon, device=device)
@@ -137,14 +139,16 @@ if __name__ == "__main__":
             ts_frame = frame_idx
             ts = time.time()
             mean_reward = np.mean(total_rewards[-100:])
-            print("%d: done %d games, mean reward %.3f, eps %.2f, speed %.2f f/s" % (
-                frame_idx, len(total_rewards), mean_reward, epsilon,
+            print("%d: steps %d done %d games, mean reward %.3f, eps %.2f, speed %.2f f/s" % (
+                frame_idx, steps, len(total_rewards), mean_reward, epsilon,
                 speed
             ))
             writer.add_scalar("epsilon", epsilon, frame_idx)
+            writer.add_scalar("steps", steps, frame_idx)
             writer.add_scalar("speed", speed, frame_idx)
             writer.add_scalar("reward_100", mean_reward, frame_idx)
             writer.add_scalar("reward", reward, frame_idx)
+            steps = 0
             if (len(total_rewards) > 100) and (best_mean_reward is None or best_mean_reward < mean_reward):
                 torch.save(net.state_dict(), ENV_NAME + "-best.dat")
                 if best_mean_reward is not None:

@@ -10,6 +10,9 @@ class Arena(object):
     def add_robot(self, robot):
         self.bots.append(robot)
 
+    def remove_robot(self, robot):
+        self.bots.remove(robot)
+
     def update(self, dt):
         for r in self.bots:
             r.step(dt)

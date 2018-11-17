@@ -13,29 +13,28 @@ class DiscretizeActionWrapper(gym.ActionWrapper):
                 1       (-1,  0)
                 2       (-1,  1)
                 3       ( 0, -1)
-                4       ( 0,  0)
-                5       ( 0,  1)
-                6       ( 1, -1)
-                7       ( 1,  0)
-                8       ( 1,  1)
+                4       ( 0,  1)
+                5       ( 1, -1)
+                6       ( 1,  0)
+                7       ( 1,  1)
         '''
         super(DiscretizeActionWrapper, self).__init__(env)
-        self.action_space = gym.spaces.Discrete(9)
+        self.action_space = gym.spaces.Discrete(8)
         self._speed = speed
 
     def action(self, action):
         if action in [0,1,2]:
             left = -self._speed
-        elif action in [3,4,5]:
+        elif action in [3,4]:
             left = 0.0
-        elif action in [6,7,8]:
+        elif action in [5,6,7]:
             left = self._speed
 
-        if action in [0,3,6]:
+        if action in [0,3,5]:
             right = -self._speed
-        elif action in [1,4,7]:
+        elif action in [1,6]:
             right = 0.0
-        elif action in [2,5,8]:
+        elif action in [2,4,7]:
             right = self._speed
 
         return (left, right)
@@ -63,4 +62,4 @@ class BufferWrapper(gym.ObservationWrapper):
 def make_env(env_name):
     env = gym.make(env_name)
     env = DiscretizeActionWrapper(env)
-    return BufferWrapper(env, 4)
+    return BufferWrapper(env, 2)

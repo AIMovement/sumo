@@ -10,7 +10,7 @@ import torch
 
 import wrappers
 import dqn_model
-
+import gym.wrappers
 import collections
 
 ENV_NAME = "sumo-v0"
@@ -21,9 +21,13 @@ VISUALIZE = True
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", required=True, help="Model file (.dat) to load")
+    parser.add_argument("-r", "--record", help="Directory to store video recording")
     args = parser.parse_args()
 
     env = wrappers.make_env(ENV_NAME)
+    if args.record:
+        env = gym.wrappers.Monitor(env, args.record, video_callable=lambda episode_id: True)
+
     net = dqn_model.DQN(env.observation_space.shape, env.action_space.n)
     net.load_state_dict(torch.load(args.model, map_location=lambda storage, loc: storage))
 
@@ -31,7 +35,9 @@ if __name__ == "__main__":
     total_reward = 0.0
     c = collections.Counter()
 
-    while True:
+    nof_games = 0
+
+    while nof_games < 15:
         start_ts = time.time()
         if VISUALIZE:
             env.render()
@@ -42,7 +48,9 @@ if __name__ == "__main__":
         state, reward, done, _ = env.step(action)
         total_reward += reward
         if done:
-            break
+            nof_games += 1
+            env.reset()
+
         if VISUALIZE:
             delta = 1/FPS - (time.time() - start_ts)
             if delta > 0:
@@ -50,3 +58,4 @@ if __name__ == "__main__":
     print("Total reward: %.2f" % total_reward)
     print("Action counts:", c)
 
+    env.close()

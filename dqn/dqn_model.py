@@ -6,10 +6,10 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
 
         self.fc = nn.Sequential(
-            nn.Linear(input_shape[0], 64),
+            nn.Linear(input_shape[0], 32),
             nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
+            #nn.Linear(32, 32),
+            #nn.ReLU(),
             nn.Linear(32, 16),
             nn.ReLU(),
             nn.Linear(16, n_actions)
