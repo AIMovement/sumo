@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", required=True, help="Model file (.dat) to load")
     parser.add_argument("-r", "--record", help="Directory to store video recording")
+    parser.add_argument("-n", "--number", default="1", help="Number of games")
     args = parser.parse_args()
 
     env = wrappers.make_env(ENV_NAME)
@@ -37,7 +38,7 @@ if __name__ == "__main__":
 
     nof_games = 0
 
-    while nof_games < 15:
+    while nof_games < int(args.number):
         start_ts = time.time()
         if VISUALIZE:
             env.render()
