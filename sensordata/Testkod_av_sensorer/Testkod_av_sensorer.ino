@@ -12,6 +12,8 @@ niklas.cooke@afconsult.com
 
 #include <Wire.h>
 
+#include "Sensors.h"
+
 
 enum {
   LEFT,
@@ -71,7 +73,70 @@ void setup() {
 }
 
 void loop() {
-  readSensors();
-  //readMPU9150();
-  delay(20);
+  static int initialized = 0;
+  int i;
+
+  if (!initialized)
+  {
+    Serial.println("Send anything to get started!");
+    if (Serial.available() > 0)
+    {
+      Serial.println("Reading some sensor values before starting:");
+      for (i=0; i<10; i++)
+      {
+        readSensors(IR_R | IR_FR | IR_FM | IR_FL | IR_L);
+        //readMPU9150();
+        delay(20);
+      }
+
+      // discard input buffer
+      while (Serial.available() > 0)
+      {
+        Serial.read();
+      }
+
+      Serial.println("Initialization done!");
+      Serial.println("Send 1-5 for reading IR sensors, with right sensor as 1 and left as 5.");
+
+      initialized = 1;
+    }
+    else
+    {
+      return;
+    }
+  }
+
+  if (Serial.available() > 0) {
+    // read the incoming byte:
+    int incomingByte = Serial.read();
+    unsigned int sensor;
+
+    switch (incomingByte - '0')
+    {
+      case 1:
+        sensor = IR_R;
+        break;
+      case 2:
+        sensor = IR_FR;
+        break;
+      case 3:
+        sensor = IR_FM;
+        break;
+      case 4:
+        sensor = IR_FL;
+        break;
+      case 5:
+        sensor = IR_L;
+        break;
+      default:
+        Serial.println("Invalid request!");
+        return;
+    }
+
+    for (int i=0; i<2000; i++)
+    {
+      readSensors(sensor);
+      delay(1);
+    }
+  }
 }
