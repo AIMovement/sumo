@@ -96,7 +96,9 @@ def calc_loss(batch, net, tgt_net, device="cpu"):
     done_mask = torch.ByteTensor(dones).to(device)
 
     state_action_values = net(states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
-    next_state_values = tgt_net(next_states_v).max(1)[0]
+    next_state_actions = net(next_states_v).max(1)[1]
+    next_state_values = tgt_net(next_states_v).gather(1, next_state_actions.unsqueeze(-1)).squeeze(-1)
+    #next_state_values = tgt_net(next_states_v).max(1)[0]
     next_state_values[done_mask] = 0.0
     next_state_values = next_state_values.detach()
 
@@ -139,7 +141,7 @@ if __name__ == "__main__":
             ts_frame = frame_idx
             ts = time.time()
             mean_reward = np.mean(total_rewards[-100:])
-            print("%d: steps %d done %d games, mean reward %.3f, eps %.2f, speed %.2f f/s" % (
+            print("%d: steps %d, done %d games, mean reward %.3f, eps %.2f, speed %.2f f/s" % (
                 frame_idx, steps, len(total_rewards), mean_reward, epsilon,
                 speed
             ))

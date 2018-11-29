@@ -81,21 +81,27 @@ class SumoEnv(gym.Env):
 
         obs = self.robot.sensor_values()
 
+        dist = norm(self.robot.position()-self.enemy.position())
+
+        prev_dist = dist if self.prev_dist == None else self.prev_dist
+
         if is_outside:
             reward = -10000.0
         #elif self.enemy.is_outside():
         #    reward = 10.0
         elif has_collided:
-            reward = 10000.0
+            reward = 10000.0 - self.nof_steps
         else:
-            reward = 2.0*self.arena.radius - norm(self.robot.position()-self.enemy.position()) - self.nof_steps
+            reward = 1.0 if dist < prev_dist else -1.0
+
+        self.prev_dist = dist
 
         return obs, reward, is_outside or has_collided, {}
 
     def reset(self):
         self.arena = Arena()
 
-        if np.random.uniform() > 1.0:
+        if np.random.uniform() > 0.5:
             # Start positions set as per competition rules
             if np.random.uniform() > 0.5:
                 y0 = 0.15
@@ -141,6 +147,7 @@ class SumoEnv(gym.Env):
         #self.enemy = Sumobot(arena=self.arena, x0= -0.15, y0= -0.15, angle0=math.pi)
 
         self.nof_steps = 0
+        self.prev_dist = None
 
         return self.robot.sensor_values()
 
