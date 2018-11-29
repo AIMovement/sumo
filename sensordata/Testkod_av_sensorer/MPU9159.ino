@@ -36,50 +36,50 @@
 #define MPU9150_I2C_SLV4_REG       0x32   // R/W
 #define MPU9150_I2C_SLV4_DO        0x33   // R/W
 #define MPU9150_I2C_SLV4_CTRL      0x34   // R/W
-#define MPU9150_I2C_SLV4_DI        0x35   // R  
+#define MPU9150_I2C_SLV4_DI        0x35   // R
 #define MPU9150_I2C_MST_STATUS     0x36   // R
 #define MPU9150_INT_PIN_CFG        0x37   // R/W
 #define MPU9150_INT_ENABLE         0x38   // R/W
-#define MPU9150_INT_STATUS         0x3A   // R  
-#define MPU9150_ACCEL_XOUT_H       0x3B   // R  
-#define MPU9150_ACCEL_XOUT_L       0x3C   // R  
-#define MPU9150_ACCEL_YOUT_H       0x3D   // R  
-#define MPU9150_ACCEL_YOUT_L       0x3E   // R  
-#define MPU9150_ACCEL_ZOUT_H       0x3F   // R  
-#define MPU9150_ACCEL_ZOUT_L       0x40   // R  
-#define MPU9150_TEMP_OUT_H         0x41   // R  
-#define MPU9150_TEMP_OUT_L         0x42   // R  
-#define MPU9150_GYRO_XOUT_H        0x43   // R  
-#define MPU9150_GYRO_XOUT_L        0x44   // R  
-#define MPU9150_GYRO_YOUT_H        0x45   // R  
-#define MPU9150_GYRO_YOUT_L        0x46   // R  
-#define MPU9150_GYRO_ZOUT_H        0x47   // R  
-#define MPU9150_GYRO_ZOUT_L        0x48   // R  
-#define MPU9150_EXT_SENS_DATA_00   0x49   // R  
-#define MPU9150_EXT_SENS_DATA_01   0x4A   // R  
-#define MPU9150_EXT_SENS_DATA_02   0x4B   // R  
-#define MPU9150_EXT_SENS_DATA_03   0x4C   // R  
-#define MPU9150_EXT_SENS_DATA_04   0x4D   // R  
-#define MPU9150_EXT_SENS_DATA_05   0x4E   // R  
-#define MPU9150_EXT_SENS_DATA_06   0x4F   // R  
-#define MPU9150_EXT_SENS_DATA_07   0x50   // R  
-#define MPU9150_EXT_SENS_DATA_08   0x51   // R  
-#define MPU9150_EXT_SENS_DATA_09   0x52   // R  
-#define MPU9150_EXT_SENS_DATA_10   0x53   // R  
-#define MPU9150_EXT_SENS_DATA_11   0x54   // R  
-#define MPU9150_EXT_SENS_DATA_12   0x55   // R  
-#define MPU9150_EXT_SENS_DATA_13   0x56   // R  
-#define MPU9150_EXT_SENS_DATA_14   0x57   // R  
-#define MPU9150_EXT_SENS_DATA_15   0x58   // R  
-#define MPU9150_EXT_SENS_DATA_16   0x59   // R  
-#define MPU9150_EXT_SENS_DATA_17   0x5A   // R  
-#define MPU9150_EXT_SENS_DATA_18   0x5B   // R  
-#define MPU9150_EXT_SENS_DATA_19   0x5C   // R  
-#define MPU9150_EXT_SENS_DATA_20   0x5D   // R  
-#define MPU9150_EXT_SENS_DATA_21   0x5E   // R  
-#define MPU9150_EXT_SENS_DATA_22   0x5F   // R  
-#define MPU9150_EXT_SENS_DATA_23   0x60   // R  
-#define MPU9150_MOT_DETECT_STATUS  0x61   // R  
+#define MPU9150_INT_STATUS         0x3A   // R
+#define MPU9150_ACCEL_XOUT_H       0x3B   // R
+#define MPU9150_ACCEL_XOUT_L       0x3C   // R
+#define MPU9150_ACCEL_YOUT_H       0x3D   // R
+#define MPU9150_ACCEL_YOUT_L       0x3E   // R
+#define MPU9150_ACCEL_ZOUT_H       0x3F   // R
+#define MPU9150_ACCEL_ZOUT_L       0x40   // R
+#define MPU9150_TEMP_OUT_H         0x41   // R
+#define MPU9150_TEMP_OUT_L         0x42   // R
+#define MPU9150_GYRO_XOUT_H        0x43   // R
+#define MPU9150_GYRO_XOUT_L        0x44   // R
+#define MPU9150_GYRO_YOUT_H        0x45   // R
+#define MPU9150_GYRO_YOUT_L        0x46   // R
+#define MPU9150_GYRO_ZOUT_H        0x47   // R
+#define MPU9150_GYRO_ZOUT_L        0x48   // R
+#define MPU9150_EXT_SENS_DATA_00   0x49   // R
+#define MPU9150_EXT_SENS_DATA_01   0x4A   // R
+#define MPU9150_EXT_SENS_DATA_02   0x4B   // R
+#define MPU9150_EXT_SENS_DATA_03   0x4C   // R
+#define MPU9150_EXT_SENS_DATA_04   0x4D   // R
+#define MPU9150_EXT_SENS_DATA_05   0x4E   // R
+#define MPU9150_EXT_SENS_DATA_06   0x4F   // R
+#define MPU9150_EXT_SENS_DATA_07   0x50   // R
+#define MPU9150_EXT_SENS_DATA_08   0x51   // R
+#define MPU9150_EXT_SENS_DATA_09   0x52   // R
+#define MPU9150_EXT_SENS_DATA_10   0x53   // R
+#define MPU9150_EXT_SENS_DATA_11   0x54   // R
+#define MPU9150_EXT_SENS_DATA_12   0x55   // R
+#define MPU9150_EXT_SENS_DATA_13   0x56   // R
+#define MPU9150_EXT_SENS_DATA_14   0x57   // R
+#define MPU9150_EXT_SENS_DATA_15   0x58   // R
+#define MPU9150_EXT_SENS_DATA_16   0x59   // R
+#define MPU9150_EXT_SENS_DATA_17   0x5A   // R
+#define MPU9150_EXT_SENS_DATA_18   0x5B   // R
+#define MPU9150_EXT_SENS_DATA_19   0x5C   // R
+#define MPU9150_EXT_SENS_DATA_20   0x5D   // R
+#define MPU9150_EXT_SENS_DATA_21   0x5E   // R
+#define MPU9150_EXT_SENS_DATA_22   0x5F   // R
+#define MPU9150_EXT_SENS_DATA_23   0x60   // R
+#define MPU9150_MOT_DETECT_STATUS  0x61   // R
 #define MPU9150_I2C_SLV0_DO        0x63   // R/W
 #define MPU9150_I2C_SLV1_DO        0x64   // R/W
 #define MPU9150_I2C_SLV2_DO        0x65   // R/W
@@ -115,7 +115,7 @@ int gyro[3];
 int temp;
 
 void initMPU()
-{      
+{
   // Clear the 'sleep' bit to start the sensor.
   MPU9150_writeSensor(MPU9150_PWR_MGMT_1, 0);
 
@@ -139,8 +139,8 @@ void readMPU9150()
   Serial.print("  ");
   Serial.print(MPU9150_readSensor(MPU9150_CMPS_ZOUT_L,MPU9150_CMPS_ZOUT_H));
   Serial.print("  ");
-  
- 
+
+
   Serial.print(MPU9150_readSensor(MPU9150_GYRO_XOUT_L,MPU9150_GYRO_XOUT_H));
   Serial.print("  ");
   Serial.print(MPU9150_readSensor(MPU9150_GYRO_YOUT_L,MPU9150_GYRO_YOUT_H));
@@ -157,7 +157,6 @@ void readMPU9150()
   Serial.println();
   delay(100);
   */
-  
 }
 
 
@@ -227,10 +226,3 @@ int MPU9150_writeSensor(int addr,int data){
 
   return 1;
 }
-
-
-
-
-
-
-
