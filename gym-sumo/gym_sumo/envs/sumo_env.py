@@ -98,6 +98,8 @@ class SumoEnv(gym.Env):
         is_outside = self.robot.is_outside()
         has_collided = self.robot.has_collided()
 
+        enemy_is_outside = self.enemy.is_outside()
+
         obs = self.robot.sensor_values()
 
         dist = norm(self.robot.position()-self.enemy.position())
@@ -105,9 +107,14 @@ class SumoEnv(gym.Env):
         prev_dist = dist if self.prev_dist == None else self.prev_dist
 
         if is_outside:
-            reward = -10000.0
-        #elif self.enemy.is_outside():
-        #    reward = 10.0
+            reward = -10000.0 + self.nof_steps
+        elif enemy_is_outside:
+            if self.enemy_behaviour == EnemyBehaviour.mirror:
+                # We cannot reward this as the same program controls both
+                # robots
+                reward = -10000 + self.nof_steps
+            else:
+                reward = 20000.0 - self.nof_steps
         elif has_collided:
             reward = 10000.0 - self.nof_steps
         else:
@@ -115,7 +122,7 @@ class SumoEnv(gym.Env):
 
         self.prev_dist = dist
 
-        is_done = is_outside or has_collided or self.nof_steps >= 3000
+        is_done = is_outside or enemy_is_outside or has_collided or self.nof_steps >= 3000
 
         return obs, reward, is_done, {}
 
