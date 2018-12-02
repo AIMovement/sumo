@@ -1,3 +1,5 @@
+from enum import Enum
+
 from gym_sumo.envs.arena import Arena
 from gym_sumo.envs.sumobot import Sumobot
 from gym.envs.classic_control import rendering
@@ -11,6 +13,13 @@ import pyglet
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
+
+
+class EnemyBehaviour(Enum):
+    """Enumeration of possible enemy behaviours."""
+    stationary = 1  # Don't move, simply
+    mirror = 2      # Do the exact same thing as the robot trainee
+
 
 class SumoEnv(gym.Env):
     """
@@ -58,12 +67,22 @@ class SumoEnv(gym.Env):
 
         self.viewer = None
 
+        self.enemy_behaviour = EnemyBehaviour.mirror
+
         self.reset()
 
     def step(self, action):
         self.nof_steps += 1
 
-        enemy_action = (0,0) #self.action_space.sample()
+        if self.enemy_behaviour == EnemyBehaviour.stationary:
+            enemy_action = (0,0) #self.action_space.sample()
+        elif self.enemy_behaviour == EnemyBehaviour.mirror:
+            enemy_action = action
+        else:
+            print("Unknown enemy behaviour configured!")
+            assert False
+
+
 
         self.robot.set_motor_commands( \
             rot_vel_wheel_left=action[0], \
