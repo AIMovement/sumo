@@ -96,7 +96,9 @@ class SumoEnv(gym.Env):
 
         self.prev_dist = dist
 
-        return obs, reward, is_outside or has_collided, {}
+        is_done = is_outside or has_collided or self.nof_steps >= 3000
+
+        return obs, reward, is_done, {}
 
     def reset(self):
         self.arena = Arena()
