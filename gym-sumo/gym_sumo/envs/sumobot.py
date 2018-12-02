@@ -113,6 +113,7 @@ class Sumobot(object):
         beta_dot = (vr - vl)/self.size
 
         self.angle += beta_dot * dt
+        self.angle %= 2*math.pi
 
         avg_vel = (vl + vr)/2.0
 
@@ -138,17 +139,34 @@ class Sumobot(object):
         return (abs(delta_rel_coord[0]) <= W) and (abs(delta_rel_coord[1]) <= H)
 
     def has_collided(self):
+        """
+        Returns tuple of:
+            Collision <True/False>
+            My front collided <True/False>
+
+        The front collision information can be used to determine if this robot
+        catched the enemy, or the other way around.
+        """
         my_corners = self.corners()
         for enemy in self.arena.get_enemies(of_robot=self):
             for corner in enemy.corners():
                 if self.is_inside(corner):
-                    return True
+                    return (True, self._is_front_collision(enemy))
 
             for corner in my_corners:
                 if enemy.is_inside(corner):
-                    return True
+                    return (True, self._is_front_collision(enemy))
 
-        return False
+        return (False, False)
+
+    def _is_front_collision(self, enemy):
+        """Returns true if the collision is with the front of myself.
+           Note: Is only relevant to call when `self.has_collided() == True`."""
+
+        rel_pos = enemy.pos - self.pos
+        angle_to_enemy = (math.atan2(rel_pos[1], rel_pos[0])) % (2*math.pi)
+
+        return math.fabs(angle_to_enemy - self.angle) < math.pi/2
 
     def is_outside(self):
         return norm(self.pos) > self.arena.radius

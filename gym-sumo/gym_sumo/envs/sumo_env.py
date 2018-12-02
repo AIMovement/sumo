@@ -1,3 +1,5 @@
+from enum import Enum
+
 from gym_sumo.envs.arena import Arena
 from gym_sumo.envs.sumobot import Sumobot
 from gym.envs.classic_control import rendering
@@ -11,6 +13,13 @@ import pyglet
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
+
+
+class EnemyBehaviour(Enum):
+    """Enumeration of possible enemy behaviours."""
+    stationary = 1  # Don't move, simply
+    mirror = 2      # Do the exact same thing as the robot trainee
+
 
 class SumoEnv(gym.Env):
     """
@@ -58,12 +67,22 @@ class SumoEnv(gym.Env):
 
         self.viewer = None
 
+        self.enemy_behaviour = EnemyBehaviour.mirror
+
         self.reset()
 
     def step(self, action):
         self.nof_steps += 1
 
-        enemy_action = (0,0) #self.action_space.sample()
+        if self.enemy_behaviour == EnemyBehaviour.stationary:
+            enemy_action = (0,0) #self.action_space.sample()
+        elif self.enemy_behaviour == EnemyBehaviour.mirror:
+            enemy_action = action
+        else:
+            print("Unknown enemy behaviour configured!")
+            assert False
+
+
 
         self.robot.set_motor_commands( \
             rot_vel_wheel_left=action[0], \
@@ -77,7 +96,9 @@ class SumoEnv(gym.Env):
 
 
         is_outside = self.robot.is_outside()
-        has_collided = self.robot.has_collided()
+        (has_collided, front_collision) = self.robot.has_collided()
+
+        enemy_is_outside = self.enemy.is_outside()
 
         obs = self.robot.sensor_values()
 
@@ -86,17 +107,25 @@ class SumoEnv(gym.Env):
         prev_dist = dist if self.prev_dist == None else self.prev_dist
 
         if is_outside:
-            reward = -10000.0
-        #elif self.enemy.is_outside():
-        #    reward = 10.0
+            reward = -10000.0 + self.nof_steps
+        elif enemy_is_outside:
+            if self.enemy_behaviour == EnemyBehaviour.mirror:
+                # We cannot reward this as the same program controls both
+                # robots
+                reward = -10000 + self.nof_steps
+            else:
+                reward = 20000.0 - self.nof_steps
         elif has_collided:
-            reward = 10000.0 - self.nof_steps
+            if front_collision:
+                reward = 10000.0 - self.nof_steps
+            else:
+                reward = -10000.0 - self.nof_steps
         else:
             reward = 1.0 if dist < prev_dist else -1.0
 
         self.prev_dist = dist
 
-        is_done = is_outside or has_collided or self.nof_steps >= 3000
+        is_done = is_outside or enemy_is_outside or has_collided or self.nof_steps >= 3000
 
         return obs, reward, is_done, {}
 
@@ -120,7 +149,7 @@ class SumoEnv(gym.Env):
                 r, th = self.arena.radius*p[0], math.pi*p[1]/2 + enemy_th0
                 self.enemy = Sumobot(arena=self.arena, x0=r*math.cos(th), y0=r*math.sin(th), angle0=math.pi)
                 self.arena.add_robot(self.enemy)
-                if not self.enemy.is_outside() and not self.enemy.has_collided():
+                if not self.enemy.is_outside() and not self.enemy.has_collided()[0]:
                     break
                 self.arena.remove_robot(self.enemy)
 
@@ -141,7 +170,7 @@ class SumoEnv(gym.Env):
                 self.enemy = Sumobot(arena=self.arena, x0=r*math.cos(th), y0=r*math.sin(th), angle0=a0)
                 self.arena.add_robot(self.enemy)
                 dist = norm(self.robot.position()-self.enemy.position())
-                if not self.enemy.is_outside() and not self.enemy.has_collided() and dist > 0.2:
+                if not self.enemy.is_outside() and not self.enemy.has_collided()[0] and dist > 0.2:
                     break
                 self.arena.remove_robot(self.enemy)
 
