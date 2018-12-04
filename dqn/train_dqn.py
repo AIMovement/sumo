@@ -141,8 +141,8 @@ if __name__ == "__main__":
             ts_frame = frame_idx
             ts = time.time()
             mean_reward = np.mean(total_rewards[-100:])
-            print("%d: steps %d, done %d games, mean reward %.3f, eps %.2f, speed %.2f f/s" % (
-                frame_idx, steps, len(total_rewards), mean_reward, epsilon,
+            print("%d: steps %d, done %d games, last reward %.3f, mean reward %.3f, eps %.2f, speed %.2f f/s" % (
+                frame_idx, steps, len(total_rewards), reward, mean_reward, epsilon,
                 speed
             ))
             writer.add_scalar("epsilon", epsilon, frame_idx)
