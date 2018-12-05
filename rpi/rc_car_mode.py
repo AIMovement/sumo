@@ -7,7 +7,7 @@ import time
 
 class Control(object):
 
-    def __init__(self, rio):
+    def __init__(self, rio, print_sensors=False):
         super(Control, self).__init__()
 
         self.rio = rio
@@ -23,12 +23,20 @@ class Control(object):
 
         self.cmd = (0.0, 0.0)
         
-        pyglet.clock.schedule_interval(self.update, 0.05)
+        pyglet.clock.schedule_interval(self.motor_update, 0.05)
+
+        if print_sensors:
+            pyglet.clock.schedule_interval(self.sensor_update, 0.2)
+
+    def sensor_update(self, dt):
+        s = rio.get_sensors()
+        if s is not None:
+            print(s)
 
     def is_pressed(self, k):
         return self.keyboard[k]
 
-    def update(self, dt):
+    def motor_update(self, dt):
         if self.is_pressed(key.Q):
             self.rio.disconnect()
             quit()
@@ -62,6 +70,9 @@ class Control(object):
 
         else:
             cmd = (0.0, 0.0)
+
+        scale = 0.5
+        cmd = (scale*cmd[0], scale*cmd[1])
 
         if cmd != self.cmd:
             self.send(cmd)

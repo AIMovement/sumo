@@ -71,7 +71,7 @@ class Robot_IO(object):
         cmd.extend([l,r])
         cmd.extend(str.encode(footer))
         
-        print("Sending {0}".format(cmd))
+        # print("Sending {0}".format(cmd))
 
         self._ser.write(cmd)
 
@@ -126,8 +126,14 @@ if __name__ == "__main__":
         rio.send_motor_commands(cmd[0], cmd[1])
 
     else:
+        period = 0.02
         while True:
+            start_ts = time.time()
+
             s = rio.get_sensors()
             if s is not None:
                 print(s)
-            time.sleep(0.01)
+
+            delta = period - (time.time() - start_ts)
+            if delta > 0:
+                time.sleep(delta)

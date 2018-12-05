@@ -16,11 +16,11 @@
 #define DIG_FR_LEFT_GROUND_SENSOR   3
 #define DIG_FR_BACK_GROUND_SENSOR   7
 
-#define LEFT_MOTORS_FORWARD      5
-#define LEFT_MOTORS_BACKWARD     6
+#define LEFT_MOTORS_FORWARD      6
+#define LEFT_MOTORS_BACKWARD     5
 
-#define RIGHT_MOTORS_FORWARD    10
-#define RIGHT_MOTORS_BACKWARD    9
+#define RIGHT_MOTORS_FORWARD     9
+#define RIGHT_MOTORS_BACKWARD    10
 
 #define START                    4
 #define STATUS_LED               8
@@ -61,18 +61,35 @@ void setup() {
 
 void loop()
 {
+  TOGGLE_STATUS_LED;
+    
+  const int dt = 5;
+
+  /* Check for motor control commands */
   static parser_t p;
-  
-  motor_cmd_t cmd;
-  if (get_motor_command(&p, &cmd)) {
-    set_motors(cmd);
+  static int m_cnt = 0;
+  const  int m_period = 50;
+
+  m_cnt += dt;
+  if (m_cnt >= m_period) {
+    m_cnt = 0;
+    motor_cmd_t cmd;
+    if (get_motor_command(&p, &cmd)) {
+      set_motors(cmd);
+    }
   }
 
-  sensor_data_t sensors;
-  read_sensors(&sensors);
-  send_sensor_data(sensors);
+  /* Sample sensors and send sensor values */
+  static int s_cnt = 0;
+  const  int s_period = 20;
 
-  TOGGLE_STATUS_LED;
-  delay(200);
-  TOGGLE_STATUS_LED;
+  s_cnt += dt;
+  if (s_cnt >= s_period) {
+    s_cnt = 0;
+    sensor_data_t sensors;
+    read_sensors(&sensors);
+    send_sensor_data(sensors);
+  }
+  
+  delay(dt);
 }
