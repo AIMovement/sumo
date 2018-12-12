@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.sumoprotocol";
+option java_outer_classname = "SumoProtocol";
+option objc_class_prefix = "SUP";
+
+package sumoprotocol;
+
+service SumoProtocol {
+
+  // A Bidirectional streaming RPC
+  rpc SumoIO(stream MotorCommand) returns (stream Sensors) {}
+}
+
+message MotorCommand {
+  float left = 1;
+  float right = 2;
+}
+
+message DistanceSensors {
+  int32 front_left = 1;
+  int32 front_front = 2;
+  int32 front_right = 3;
+  int32 left = 4;
+  int32 right = 5;
+}
+
+message GroundSensors {
+  bool left = 1;
+  bool right = 2;
+  bool back = 3;
+}
+
+message Sensors {
+  DistanceSensors distance = 1;
+  GroundSensors ground = 2;
+}
