@@ -48,12 +48,10 @@ class Robot_IO(object):
             print('Closing serial on device {0}'.format(self._ser.port))
             try:
                 self._ser.close()
-            except serial.SerialException as e:
+            except Exception as e:
                 print(e)
             else:
                 self._is_connected = False
-        
-        self._ser.close()
 
     def send_motor_commands(self, left=0.0, right=0.0):
         assert self._is_connected == True
@@ -63,24 +61,24 @@ class Robot_IO(object):
 
         l = int(COMMAND_RANGE*abs(left))
         r = int(COMMAND_RANGE*abs(right))
-        
+
         header = '<{0}{1}'.format('+' if left >= 0.0 else '-', '+' if right >= 0.0 else '-')
         footer = '>'
 
         cmd = bytearray(str.encode(header))
         cmd.extend([l,r])
         cmd.extend(str.encode(footer))
-        
+
         # print("Sending {0}".format(cmd))
 
         self._ser.write(cmd)
 
     def is_pending_data(self):
         return self._ser.inWaiting() > 0
-        
+
     def get_sensors(self):
         assert self._is_connected == True
-        
+
         n = self._ser.inWaiting()
         if n > 0:
             d = bytearray(self._ser.read(n))
@@ -91,7 +89,7 @@ class Robot_IO(object):
                 self._s_buf = self._s_buf[last_match.end():]
 
                 values = list(map(int,last_match.group(1).split(',')))
-                
+
                 return SensorData(front_left  = values[0],\
                                   front       = values[1],\
                                   front_right = values[2],\
@@ -102,7 +100,7 @@ class Robot_IO(object):
                                   bottom_back = (values[5] & 0x04 != 0))
 
         return None
-    
+
 if __name__ == "__main__":
     print("Test of robot communication using a serial port")
 
@@ -111,7 +109,7 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--baud', default='115200', help='Baudrate')
     parser.add_argument('-w', '--write', help='Command sent to motors, e.g. 0.4,-0.5')
     args = parser.parse_args()
-    
+
     rio = Robot_IO(args.port, args.baud)
 
     rio.connect()
