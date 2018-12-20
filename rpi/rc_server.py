@@ -43,7 +43,7 @@ class Remote_IO(sumo_pb2_grpc.SumoProtocolServicer):
             while True:
                 time.sleep(0.01)
                 for cmd in request_iterator:
-                    print('cmd: {}'.format(cmd))
+                    print(cmd)
                     self.cmdqueue.append(self.convert_command(cmd))
 
         thread = threading.Thread(target=incoming_commands)
@@ -53,33 +53,13 @@ class Remote_IO(sumo_pb2_grpc.SumoProtocolServicer):
         def sensor_values():
             while True:
                 time.sleep(0.01)
-                if len(self.sensorqueue) > 0:
+                while len(self.sensorqueue) > 0:
                     yield self.sensorqueue.popleft()
 
         output = sensor_values()
 
         while True:
             yield self.convert_sensor(next(output))
-
-
-class RobotWorker(object):
-
-    def __init__(self, rio, cmdqueue, sensorqueue):
-        super(RobotWorker, self).__init__()
-        self.rio = rio
-        self.cmdqueue = cmdqueue
-        self.sensorqueue = sensorqueue
-
-        pyglet.clock.schedule_interval(self.update, 0.02)
-
-    def update(self, dt):
-        while len(self.cmdqueue) > 0:
-            cmd = self.cmdqueue.popleft()
-            self.rio.send_motor_commands(left=cmd[0], right=cmd[1])
-
-        s = self.rio.get_sensors()
-        if s is not None:
-            self.sensorqueue.append(s)
 
 def SerialTasks(rio, cmdqueue, sensorqueue):
     while True:
