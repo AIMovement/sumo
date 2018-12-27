@@ -52,7 +52,7 @@ class Remote_IO(sumo_pb2_grpc.SumoProtocolServicer):
 
         def sensor_values():
             while True:
-                time.sleep(0.01)
+                time.sleep(0.02)
                 while len(self.sensorqueue) > 0:
                     yield self.sensorqueue.popleft()
 
@@ -80,8 +80,8 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--baud', default='115200', help='Baudrate')
     args = parser.parse_args()
 
-    cmdqueue = deque()
-    sensorqueue = deque()
+    cmdqueue = deque(maxlen=4)
+    sensorqueue = deque(maxlen=4)
 
     #rio = Robot_IO('/dev/tty.usbserial-DJ004U9C', '115200')#/dev/ttyUSB0', '115200')
     rio = Robot_IO(args.serial_port, args.baud)

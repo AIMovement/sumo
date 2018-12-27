@@ -159,7 +159,6 @@ def generate_commands(cmdqueue):
             yield sumo_pb2.MotorCommand(left=cmd[0], right=cmd[1])
 
 def communicate(stub, cmdqueue, sensorqueue):
-    sleep(1.0)
     responses = stub.SumoIO(generate_commands(cmdqueue))
     for response in responses:
         #print("Received sensors {0}".format(response))
