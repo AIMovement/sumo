@@ -39,43 +39,42 @@ int get_motor_command(parser_t *p, motor_cmd_t *complete_cmd)
     switch (p->state) {
       case WAITING:
         if ('<' == b) {
-	  p->state = LEFT_DIR;
-	}
-	break;
+	        p->state = LEFT_DIR;
+	      }
+	      break;
 
       case LEFT_DIR:
-	p->buf.left_dir = ('+' == b) ? FORWARD : BACKWARD;
-	p->state = RIGHT_DIR;
-	break;
-	
+        p->buf.left_dir = ('+' == b) ? FORWARD : BACKWARD;
+        p->state = RIGHT_DIR;
+        break;
+
       case RIGHT_DIR:
         p->buf.right_dir = ('+' == b) ? FORWARD : BACKWARD;
         p->state = LEFT_VAL;
-	break;
-	
+	      break;
+
       case LEFT_VAL:
         p->buf.left_command = b;
-	p->state = RIGHT_VAL;
+	      p->state = RIGHT_VAL;
         break;
 
       case RIGHT_VAL:
         p->buf.right_command = b;
-	p->state = FOOTER;
-	break;
+	      p->state = FOOTER;
+	      break;
 
       case FOOTER:
-	is_complete = ('>' == b);
+	      is_complete = ('>' == b);
         if (is_complete) {
-	  *complete_cmd = p->buf;
-	}
-	reset(p);
-	break;
+	        *complete_cmd = p->buf;
+	      }
+	      reset(p);
+	      break;
       
       default:
-	reset(p);
+	      reset(p);
         break;
     }
-    
   }
 
   return is_complete;
