@@ -19,13 +19,13 @@ ENV_NAME = "sumo-v0"
 MEAN_REWARD_BOUND = 1.5*10**6 #19.5
 
 GAMMA = 0.99
-BATCH_SIZE = 128
-REPLAY_SIZE = 10000
+BATCH_SIZE = 32
+REPLAY_SIZE = 30000
 LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 10000
-REPLAY_START_SIZE = 10000
+REPLAY_START_SIZE = 10000 # May never be > REPLAY_SIZE
 
-EPSILON_DECAY_LAST_FRAME = 10*10**6
+EPSILON_DECAY_LAST_FRAME = 0.5*1*10**6
 EPSILON_START = 1.0
 EPSILON_FINAL = 0.02
 
@@ -75,7 +75,6 @@ class Agent:
         # do step in the environment
         new_state, reward, is_done, _ = self.env.step(action)
         self.total_reward += reward
-        new_state = new_state
 
         exp = Experience(self.state, action, reward, is_done, new_state)
         self.exp_buffer.append(exp)
@@ -112,8 +111,8 @@ if __name__ == "__main__":
 
     device = torch.device("cpu")
 
-    net = dqn_model.DQN(env.observation_space.shape, env.action_space.n).to(device)
-    tgt_net = dqn_model.DQN(env.observation_space.shape, env.action_space.n).to(device)
+    net = dqn_model.DuelingDQN(env.observation_space.shape, env.action_space.n).to(device)
+    tgt_net = dqn_model.DuelingDQN(env.observation_space.shape, env.action_space.n).to(device)
     writer = SummaryWriter(comment="-" + ENV_NAME)
     print(net)
 
