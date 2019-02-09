@@ -86,7 +86,7 @@ class Agent:
         return done_reward
 
 
-def calc_loss(batch, net, tgt_net, device="cpu"):
+def calc_loss_double_dqn(batch, net, tgt_net, device="cpu"):
     states, actions, rewards, dones, next_states = batch
 
     states_v = torch.tensor(states).to(device)
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
         optimizer.zero_grad()
         batch = buffer.sample(BATCH_SIZE)
-        loss_t = calc_loss(batch, net, tgt_net, device=device)
+        loss_t = calc_loss_double_dqn(batch, net, tgt_net, device=device)
         loss_t.backward()
         optimizer.step()
     writer.close()
