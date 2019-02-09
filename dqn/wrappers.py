@@ -4,7 +4,7 @@ import numpy as np
 
 class DiscretizeActionWrapper(gym.ActionWrapper):
 
-    def __init__(self, env, speed = 15.0):
+    def __init__(self, env, speed = 30.0):
         '''
             Overrides the continuous action space with a discrete version.
             Actions:
@@ -62,4 +62,4 @@ class BufferWrapper(gym.ObservationWrapper):
 def make_env(env_name):
     env = gym.make(env_name)
     env = DiscretizeActionWrapper(env)
-    return BufferWrapper(env, 2)
+    return BufferWrapper(env, 1)

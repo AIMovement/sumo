@@ -123,8 +123,7 @@ class Sumobot(object):
         self.pos += np.array([[x_dot], [y_dot]]) * dt
 
     def sensor_values(self):
-        vals = [sensor.value() for sensor in self.distance_sensors] + \
-            [np.float32(sensor.value()) for sensor in self.digital_sensors]
+        vals = [sensor.value() for sensor in self.distance_sensors]
         return np.array(vals)
 
     def corners(self):

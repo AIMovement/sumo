@@ -29,7 +29,7 @@ if __name__ == "__main__":
     if args.record:
         env = gym.wrappers.Monitor(env, args.record, video_callable=lambda episode_id: True)
 
-    net = dqn_model.DQN(env.observation_space.shape, env.action_space.n)
+    net = dqn_model.DuelingDQN(env.observation_space.shape, env.action_space.n)
     net.load_state_dict(torch.load(args.model, map_location=lambda storage, loc: storage))
 
     state = env.reset()
