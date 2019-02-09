@@ -47,27 +47,25 @@ class SumoEnv(gym.Env):
     }
 
     TIME_STEP = 0.02
+    MAGIC_SCALING = 1.0/(0.015*30*TIME_STEP)
 
     def __init__(self):
         # Two control signals: left and right motor command, each within -1 to 1
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
-        low = np.zeros(8)
+        low = np.zeros(5)
         high = np.array([
             np.finfo(np.float32).max,
             np.finfo(np.float32).max,
             np.finfo(np.float32).max,
             np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            1.0,
-            1.0,
-            1.0])
+            np.finfo(np.float32).max])
 
         self.observation_space = spaces.Box(low, high, dtype=np.float32)
 
         self.viewer = None
 
-        self.enemy_behaviour = EnemyBehaviour.mirror
+        self.enemy_behaviour = EnemyBehaviour.stationary
 
         self.reset()
 
@@ -121,7 +119,7 @@ class SumoEnv(gym.Env):
             else:
                 reward = -10000.0 - self.nof_steps
         else:
-            reward = 1.0 if dist < prev_dist else -1.0
+            reward = self.MAGIC_SCALING*(prev_dist - dist) # 1.0 if dist < prev_dist else -1.0
 
         self.prev_dist = dist
 
